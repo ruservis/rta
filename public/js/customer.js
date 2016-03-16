@@ -51,8 +51,16 @@ function init(position) {
 
 socket.on('initDriverLoc', function(drivers) {
 	console.log(JSON.stringify(drivers, 3));
+	var myloc=mymarker.getLatLng();
+	
+var bounds = [[myloc.lat+0.0025,myloc.lng+0.0025],[myloc.lat+0.0025,myloc.lng-0.0025],[myloc.lat-0.0025,myloc.lng+0.0025],[myloc.lat-0.0025,myloc.lng-0.0025]];   
 	_.each(drivers, function(driver) {
 		console.log(JSON.stringify(driver, 3))
+
+	
+	var rect = L.rectangle([bounds, {color: 'yellow', weight: 10}]).addTo(map);
+	var m=rect.getBounds()
+	if(m.contains(driver.latLong))
 		markers[driver.id] = L.Marker.movingMarker([
 			driver.latLong,
 			driver.latLong

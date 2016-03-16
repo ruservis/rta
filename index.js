@@ -19,9 +19,15 @@ io.on('connection', function(socket) {
 
 	socket.on('init', function(data) {
 		if (data.isDriver) {
-			drivers[socket.id] = data.latLong;
+			drivers[socket.id] = {
+			id: socket.id,
+			latLong: data.latLong
+		}
 			console.log("Driver Added at " + socket.id);
 		} else {
+			if(data.latLong)
+			var results={};
+
 			socket.emit('initDriverLoc', drivers);
 		}
 	});
