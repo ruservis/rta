@@ -3,6 +3,8 @@ var map = L.map('map');
 var socket = io();
 var isDriver = true;
 var added = false;
+var mymarker;
+var popup = L.popup();
 
 L.tileLayer('https://mts1.google.com/vt/lyrs=m@186112443&hl=x-local&src=app&x={x}&y={y}&z={z}&s=Galile', {
     maxZoom: 18,
@@ -14,38 +16,6 @@ var carIcon = L.icon({
     iconSize: [30, 30]
 });
 
-var options = {
-    enableHighAccuracy: true,
-    timeout: 2000,
-    maximumAge: 0,
-};
-
-if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(init, error, options);
-} else {
-    alert("Geolocation is not supported by this browser.");
-}
-
-function init(position) {
-    latLong = getLatLong(position);
-    var marker = L.marker(latLong, {
-        icon: carIcon
-        }).addTo(map);
-    if (!added)
-        socket.emit('init', {
-            latLong: latLong
-        });
-    id = navigator.geolocation.watchPosition(success, error, options);
-}
-
-
-/*var mymarker = L.Marker.movingMarker([
-    [0, 0],
-    [0, 0]
-], [100], {
-    icon: carIcon
-}).addTo(map);*/
-
 map.locate({
     setView: true,
     maxZoom: 18,
@@ -53,12 +23,56 @@ map.locate({
     enableHighAccuracy: true,
 });
 
+var options = {
+    enableHighAccuracy: true,
+    timeout: 2000,
+    maximumAge: 1000,
+};
+
+if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(init);
+} else {
+    alert("Geolocation is not supported by this browser.");
+}
+
+map.on('click', onMapClick)
+
+function init(position) {
+    latLong = getLatLong(position);
+    mymarker = L.Marker.movingMarker([
+        latLong,
+        latLong
+    ], [500], {
+        icon: carIcon,
+        autostart: true
+    }).addTo(map);
+    //mymarker.start();    
+    if (!added)
+        socket.emit('init', {
+            isDriver: isDriver,
+            latLong: latLong
+        });
+    id = navigator.geolocation.watchPosition(success, error, options);
+}
+
+function onMapClick(e) {
+    popup
+        .setLatLng(e.latlng)
+        .setContent("You clicked the map at " + e.latlng.toString())
+        .openOn(map);
+         mymarker.bindPopup("Hola Amigo,You are here ").openPopup();
+    mymarker.moveTo([e.latlng.lat, e.latlng.lng], 3000)
+    socket.emit('locChanged', {
+        latLong: [e.latlng.lat, e.latlng.lng]
+    });
+}
+
 function success(position) {
-    /*mymarker.moveTo([pos.coords.latitude, pos.coords.longitude], 10000)
-    mymarker.bindPopup('You are at lat:' + pos.coords.latitude + 'long:' + pos.coords.longitude)*/
+    var latLong = getLatLong(position)
+    mymarker.moveTo(latLong, 3000)    
     map.setView(latLong, 16)
     socket.emit('locChanged', {
-        latLong: getLatLong(position)
+        latLong: latLong
     });
 }
 

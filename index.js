@@ -18,18 +18,29 @@ app.get('/driver', function(req, res) {
 io.on('connection', function(socket) {
 
 	socket.on('init', function(data) {
-		drivers[socket.id] = data.latLong;
-		console.log("Driver Added at "+ socket.id);
+		if (data.isDriver) {
+			drivers[socket.id] = data.latLong;
+			console.log("Driver Added at " + socket.id);
+		} else {
+			socket.emit('initDriverLoc', drivers);
+		}
 	});
 
 	socket.on('locChanged', function(data) {
-		drivers[socket.id] = data;
+		drivers[socket.id] = {
+			id: socket.id,
+			latLong: data.latLong
+		}
 		console.log("Driver " + socket.id + " location changed.");
 		console.log("Cords : " + data.latLong);
+		socket.broadcast.emit('driverLocChanged', {
+			id: socket.id,
+			latLong: data.latLong
+		})
 	});
 
 	socket.on('disconnect', function() {
-		console.log("Driver disconnected at "+ socket.id);
+		console.log("Driver disconnected at " + socket.id);
 		delete drivers[socket.id];
 	});
 
