@@ -1,4 +1,5 @@
-var map = L.map('map').setView([12.909022, 77.6376318], 15);
+var map = L.map('map');
+var socket = io();
 
 L.tileLayer('https://mts1.google.com/vt/lyrs=m@186112443&hl=x-local&src=app&x={x}&y={y}&z={z}&s=Galile', {
 	attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -30,12 +31,11 @@ id = navigator.geolocation.watchPosition(success, error, options);
 
 function success(pos) {
 
+	map.setView([pos.coords.latitude, pos.coords.longitude], 15)
 	mymarker.moveTo([pos.coords.latitude, pos.coords.longitude], 10)
 	L.circle([pos.coords.latitude, pos.coords.longitude], 180).addTo(map);
 
 	mymarker.bindPopup('You are at lat:' + pos.coords.latitude + 'long:' + pos.coords.longitude)
-	map.setView([pos.coords.latitude, pos.coords.longitude], 10)
-
 
 }
 
