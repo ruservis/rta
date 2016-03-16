@@ -1,7 +1,3 @@
-var express = require('express');
-var app = express();
-var fs = require("fs");
-var browserify = require('browserify');
 var myloc = [];
 var id;
 var map = L.map('map');
@@ -13,7 +9,7 @@ L.tileLayer('https://mts1.google.com/vt/lyrs=m@186112443&hl=x-local&src=app&x={x
 
 
 var carIcon = L.icon({
-    iconUrl: "mycar.png",
+    iconUrl: "/images/mycar.png",
     iconSize: [30, 30]
 });
 
