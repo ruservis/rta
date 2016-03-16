@@ -13,7 +13,6 @@ app.get('/driver', function(req, res) {
 	res.sendFile(__dirname + '/views/drive.html');
 });
 
-
 server.listen(8080, function() {
 	console.log('Server started at ' + (new Date().toLocaleString().substr(10, 12)));
 });
