@@ -4,7 +4,7 @@ var server = require('http').Server(app)
 var io = require('socket.io')(server);
 
 var drivers = {};
-var customer={};
+
 app.use(express.static(__dirname + '/public'));
 
 app.get('/customer', function(req, res) {
@@ -21,15 +21,15 @@ app.get('/driver', function(req, res) {
 
 io.on('connection', function(socket) {
 
-	
+
 	socket.on('init', function(data) {
 		if (data.isDriver) {
 			drivers[socket.id] = {
-			id: socket.id,
-			latLong: data.latLong
-		}
-			
+				id: socket.id,
+				latLong: data.latLong
+			};
 			console.log("Driver Added at " + socket.id);
+			socket.broadcast.to('customers').emit('driverAdded', drivers[socket.id]);
 		} else {
 			socket.join('customers');
 			socket.emit('initDriverLoc', drivers);
@@ -41,8 +41,8 @@ io.on('connection', function(socket) {
 			id: socket.id,
 			latLong: data.latLong
 		}
-		console.log("Driver " + socket.id + " location changed.");
-		console.log("Cords : " + data.latLong);
+		/*console.log("Driver " + socket.id + " location changed.");
+		console.log("Cords : " + data.latLong);*/
 		socket.broadcast.emit('driverLocChanged', {
 			id: socket.id,
 			latLong: data.latLong
