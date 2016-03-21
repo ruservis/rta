@@ -3,6 +3,8 @@ var socket = io();
 var isDriver = false;
 var markers = {};
 var mymarker;
+var inited = false;
+
 if ("geolocation" in navigator) {
 	console.log('locfound');
 } else {
@@ -13,20 +15,6 @@ L.tileLayer('https://mts1.google.com/vt/lyrs=m@186112443&hl=x-local&src=app&x={x
 	maxZoom: 20
 }).addTo(map);
 
-map.locate({
-	setView: true,
-	maxZoom: 15,
-	watch: true,
-	enableHighAccuracy: true
-});
-
-var options = {
-	enableHighAccuracy: false,
-	timeout: 10000,
-	maximumAge: 1000,
-
-};
-
 var carIcon = L.icon({
 	iconUrl: "/images/mycar.png",
 	iconSize: [30, 30]
@@ -36,17 +24,29 @@ var clientIcon = L.icon({
 	iconUrl: "/images/marker2.png",
 	iconSize: [15, 15]
 });
+
+map.locate({
+	setView: true,
+	maxZoom: 15,
+	watch: true
+});
+
+var options = {
+	enableHighAccuracy: false,
+	timeout: 10000,
+	maximumAge: 1000,
+
+};
+
+
 map.on('zoomend', _changeLocateMaxZoom);
+map.on('locationfound', success);
 
 function _changeLocateMaxZoom(e) {
 	if (map._locateOptions) {
 		map._locateOptions.maxZoom = map.getZoom();
 	}
 }
-
-
-navigator.geolocation.getCurrentPosition(init);
-
 
 function init(position) {
 	latLong = getLatLong(position);
@@ -56,21 +56,15 @@ function init(position) {
 	], 0, {
 		autostart: true,
 		zoom: 15,
-		icon:clientIcon
+		icon: clientIcon
 	}).addTo(map);
-
-	var circle = L.circle([position.lat, position.lng], 50, {
-		color: 'red',
-		fillColor: '#f03',
-		fillOpacity: 0.5
-	}).addTo(map);
+	
 	socket.emit('init', {
 		isDriver: isDriver,
 		latLong: latLong
 	});
-	id = navigator.geolocation.watchPosition(success, error, options);
+	inited= true;
 }
-
 
 socket.on('initDriverLoc', function(drivers) {
 
@@ -79,7 +73,7 @@ socket.on('initDriverLoc', function(drivers) {
 		markers[driver.id] = L.Marker.movingMarker([
 			driver.latLong,
 			driver.latLong
-		], [5000], {
+		], [10000], {
 			icon: carIcon,
 			autostart: true,
 			zoom: 15
@@ -92,7 +86,7 @@ socket.on('driverAdded', function(driver) {
 	markers[driver.id] = L.Marker.movingMarker([
 		driver.latLong,
 		driver.latLong
-	], [5000], {
+	], [10000], {
 		icon: carIcon,
 		autostart: true,
 		zoom: 15
@@ -111,9 +105,10 @@ socket.on('driverLocChanged', function(data) {
 })
 
 function success(pos) {
-
-	//map.setView([pos.coords.latitude, pos.coords.longitude], 15)
-	mymarker.moveTo([pos.coords.latitude, pos.coords.longitude], 10000)
+	if (!inited)
+		init(pos)
+	else
+		mymarker.moveTo(getLatLong(pos), 3000)
 }
 
 function error(err) {
@@ -121,5 +116,5 @@ function error(err) {
 }
 
 function getLatLong(position) {
-	return ([position.coords.latitude, position.coords.longitude])
+	return ([position.latitude, position.longitude])
 }

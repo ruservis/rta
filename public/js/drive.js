@@ -107,5 +107,5 @@ function error(err) {
 
 
 function getLatLong(position) {
-    return ([position.coords.latitude, position.coords.longitude])
+    return ([position.latitude, position.longitude])
 }

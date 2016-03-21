@@ -25,8 +25,8 @@ var carIcon = L.icon({
 
 map.locate({
     setView: true,
-    maxZoom: 15
-   
+    maxZoom: 20,
+    
 });
 
 var options = {
@@ -47,21 +47,21 @@ function _changeLocateMaxZoom(e) {
 }
 
 function onLocationFound(e) {
-    
+    map.setView([e.latlng.lat,e.latlng.lng],15)
      mymarker = L.Marker.movingMarker([
         e.latlng,
         e.latlng
     ], [50], {
         icon: carIcon,
         autostart: true,
-        zoom: 15
+        setZoom: 15
     }).addTo(map);
 
      socket.emit('init', {
         isDriver: isDriver,
         latLong: e.latlng
     });
-id = navigator.geolocation.watchPosition(success, error, options);
+
 }
 
 
@@ -80,17 +80,7 @@ function onMapClick(e) {
     }
 }
 
-function success(position) {
-    var loc = mymarker.getLatLng();
-    var latLong = getLatLong(position)
-    var angle = setangle(loc.lat, loc.lng, latLong[0], latLong[1])
-    console.log('new lat='+loc.lat+'new long='+loc.lng)
-    mymarker.setIconAngle(angle);
-    mymarker.moveTo(latLong, 3000)
-    socket.emit('locChanged', {
-        latLong: latLong
-    });
-}
+
 
 function setangle(slat, slong, dlat, dlong) {
 
@@ -103,10 +93,7 @@ function setangle(slat, slong, dlat, dlong) {
     return angle1;
 }
 
-function error(err) {
-    console.log('ERROR ' + err.message);
-}
 
 function getLatLong(position) {
-    return ([position.coords.latitude, position.coords.longitude])
+    return ([position.latitude, position.longitude])
 }
