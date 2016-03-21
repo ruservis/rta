@@ -32,6 +32,10 @@ var carIcon = L.icon({
 	iconSize: [30, 30]
 });
 
+var clientIcon = L.icon({
+	iconUrl: "/images/marker2.png",
+	iconSize: [15, 15]
+});
 map.on('zoomend', _changeLocateMaxZoom);
 
 function _changeLocateMaxZoom(e) {
@@ -40,11 +44,9 @@ function _changeLocateMaxZoom(e) {
 	}
 }
 
-if (navigator.geolocation) {
-	navigator.geolocation.getCurrentPosition(init);
-} else {
-	prompt("Geolocation is not supported by this browser.");
-}
+
+navigator.geolocation.getCurrentPosition(init);
+
 
 function init(position) {
 	latLong = getLatLong(position);
@@ -53,7 +55,14 @@ function init(position) {
 		latLong
 	], 0, {
 		autostart: true,
-		zoom: 15
+		zoom: 15,
+		icon:clientIcon
+	}).addTo(map);
+
+	var circle = L.circle([position.lat, position.lng], 50, {
+		color: 'red',
+		fillColor: '#f03',
+		fillOpacity: 0.5
 	}).addTo(map);
 	socket.emit('init', {
 		isDriver: isDriver,
@@ -65,19 +74,8 @@ function init(position) {
 
 socket.on('initDriverLoc', function(drivers) {
 
-	var myloc = mymarker.getLatLng();
-
-	var bounds = [
-		[myloc.lat + 0.0025, myloc.lng + 0.0025],
-		[myloc.lat + 0.0025, myloc.lng - 0.0025],
-		[myloc.lat - 0.0025, myloc.lng + 0.0025],
-		[myloc.lat - 0.0025, myloc.lng - 0.0025]
-	];
 	_.each(drivers, function(driver) {
 
-		/*	var rect = L.rectangle([bounds, {color: 'white', weight: 1}]).addTo(map);
-		var m=rect.getBounds()
-		if(m.contains(driver.latLong))*/
 		markers[driver.id] = L.Marker.movingMarker([
 			driver.latLong,
 			driver.latLong
@@ -101,8 +99,14 @@ socket.on('driverAdded', function(driver) {
 	}).addTo(map);
 });
 
+socket.on('driverRemoved', function(driver) {
+	console.log("driver left.")
+	map.removeLayer(markers[driver.id])
+
+});
+
 socket.on('driverLocChanged', function(data) {
-	//console.log(data.id)
+
 	markers[data.id].moveTo(data.latLong, 1000)
 })
 

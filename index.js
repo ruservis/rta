@@ -51,6 +51,7 @@ io.on('connection', function(socket) {
 
 	socket.on('disconnect', function() {
 		console.log("Driver disconnected at " + socket.id);
+		socket.broadcast.to('customers').emit('driverRemoved', drivers[socket.id]);
 		delete drivers[socket.id];
 	});
 

@@ -35,11 +35,8 @@ var options = {
     maximumAge: 1000,
 };
 
-if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(init);
-} else {
-    alert("Geolocation is not supported by this browser.");
-}
+map.on('locationfound', onLocationFound);
+  
 map.on('click', onMapClick)
 map.on('zoomend', _changeLocateMaxZoom);
 
@@ -48,26 +45,24 @@ function _changeLocateMaxZoom(e) {
         map._locateOptions.maxZoom = map.getZoom();
     }
 }
-
-function init(position) {
-    latLong = getLatLong(position);
-
-    mymarker = L.Marker.movingMarker([
-        latLong,
-        latLong
+function onLocationFound(e) {
+    
+     mymarker = L.Marker.movingMarker([
+        e.latlng,
+        e.latlng
     ], [50], {
         icon: carIcon,
         autostart: true,
         zoom: 15
     }).addTo(map);
-    
-    socket.emit('init', {
+
+     socket.emit('init', {
         isDriver: isDriver,
-        latLong: latLong
+        latLong: e.latlng
     });
 id = navigator.geolocation.watchPosition(success, error, options);
-
 }
+
 
 function onMapClick(e) {
     if (faker == true) {
@@ -87,7 +82,7 @@ function success(position) {
     var loc = mymarker.getLatLng();
     var latLong = getLatLong(position)
     var angle = setangle(loc.lat, loc.lng, latLong[0], latLong[1])
-        // map.setView(latLong, 15)
+       console.log('angle=='+angle)
     mymarker.setIconAngle(angle);
     mymarker.moveTo(latLong, 3000)
     socket.emit('locChanged', {
@@ -109,6 +104,7 @@ function setangle(slat, slong, dlat, dlong) {
 function error(err) {
     console.log('ERROR ' + err.message);
 }
+
 
 function getLatLong(position) {
     return ([position.coords.latitude, position.coords.longitude])
