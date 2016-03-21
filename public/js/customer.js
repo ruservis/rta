@@ -3,7 +3,11 @@ var socket = io();
 var isDriver = false;
 var markers = {};
 var mymarker;
-
+if ("geolocation" in navigator) {
+    console.log('locfound');
+} else {
+  prompt('Allow location access')
+}
 L.tileLayer('https://mts1.google.com/vt/lyrs=m@186112443&hl=x-local&src=app&x={x}&y={y}&z={z}&s=Galile', {
 	attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
 	maxZoom: 20
@@ -11,15 +15,15 @@ L.tileLayer('https://mts1.google.com/vt/lyrs=m@186112443&hl=x-local&src=app&x={x
 
 map.locate({
 	setView: true,
-	maxZoom: 18,
+	maxZoom: 15,
 	watch: true,
-	enableHighAccuracy: true,
+	enableHighAccuracy: true
 });
 
 var options = {
-	enableHighAccuracy: true,
-	timeout: 2000,
-	maximumAge: 0,
+	enableHighAccuracy: false,
+	timeout: 10000,
+	maximumAge: 1000,
 
 };
 
@@ -28,10 +32,18 @@ var carIcon = L.icon({
     iconSize: [30, 30]
 });
 
+map.on('zoomend', _changeLocateMaxZoom);
+
+function _changeLocateMaxZoom(e) {
+    if (map._locateOptions) {
+        map._locateOptions.maxZoom = map.getZoom();
+    }
+}
+
 if (navigator.geolocation) {
 	navigator.geolocation.getCurrentPosition(init);
 } else {
-	alert("Geolocation is not supported by this browser.");
+	prompt("Geolocation is not supported by this browser.");
 }
 
 function init(position) {
@@ -39,8 +51,9 @@ function init(position) {
 	mymarker = L.Marker.movingMarker([
         latLong,
         latLong
-    ], [500], {        
-        autostart: true
+    ], 0, {        
+        autostart: true,
+        zoom:15
     }).addTo(map);
 	socket.emit('init', {
 		isDriver: isDriver,
@@ -49,37 +62,52 @@ function init(position) {
 	id = navigator.geolocation.watchPosition(success, error, options);
 }
 
+
 socket.on('initDriverLoc', function(drivers) {
-	console.log(JSON.stringify(drivers, 3));
+	
 	var myloc=mymarker.getLatLng();
 	
 var bounds = [[myloc.lat+0.0025,myloc.lng+0.0025],[myloc.lat+0.0025,myloc.lng-0.0025],[myloc.lat-0.0025,myloc.lng+0.0025],[myloc.lat-0.0025,myloc.lng-0.0025]];   
 	_.each(drivers, function(driver) {
-		console.log(JSON.stringify(driver, 3))
-
 	
-	var rect = L.rectangle([bounds, {color: 'yellow', weight: 10}]).addTo(map);
+	/*	var rect = L.rectangle([bounds, {color: 'white', weight: 1}]).addTo(map);
 	var m=rect.getBounds()
-	if(m.contains(driver.latLong))
+	if(m.contains(driver.latLong))*/
 		markers[driver.id] = L.Marker.movingMarker([
 			driver.latLong,
 			driver.latLong
-		], [500], {
+		], [5000], {
 			icon: carIcon,
-			autostart: true
+			autostart: true,
+			zoom:15
 		}).addTo(map);
 	});
 });
 
+function check(drivers)
+{
+		_.each(drivers, function(driver) {
+	markers[driver.id] = L.Marker.movingMarker([
+			driver.latLong,
+			driver.latLong
+		], [5000], {
+			icon: carIcon,
+			autostart: true,
+			zoom:15
+		}).addTo(map);
+	});
+}
+setInterval(check, 2000)
 socket.on('driverLocChanged', function(data){
+	
+	console.log(data.id)
 	markers[data.id].moveTo(data.latLong, 1000)
 })
 
 function success(pos) {
 
-	map.setView([pos.coords.latitude, pos.coords.longitude], 15)
-	mymarker.moveTo([pos.coords.latitude, pos.coords.longitude], 10)
-	mymarker.bindPopup('You are at lat:' + pos.coords.latitude + 'long:' + pos.coords.longitude)
+	//map.setView([pos.coords.latitude, pos.coords.longitude], 15)
+	mymarker.moveTo([pos.coords.latitude, pos.coords.longitude], 10000)
 }
 
 function error(err) {
