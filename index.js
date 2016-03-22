@@ -2,7 +2,6 @@ var express = require('express');
 var app = express();
 var server = require('http').Server(app)
 var io = require('socket.io')(server);
-
 var drivers = {};
 
 app.use(express.static(__dirname + '/public'));
@@ -41,8 +40,7 @@ io.on('connection', function(socket) {
 			id: socket.id,
 			latLong: data.latLong
 		}
-		/*console.log("Driver " + socket.id + " location changed.");
-		console.log("Cords : " + data.latLong);*/
+		
 		socket.broadcast.emit('driverLocChanged', {
 			id: socket.id,
 			latLong: data.latLong

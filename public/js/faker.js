@@ -1,38 +1,39 @@
-var id;
 var map = L.map('map');
 var socket = io();
 var isDriver = true;
-var added = false;
 var mymarker;
-var popup = L.popup();
 var faker = true;
 
 if ("geolocation" in navigator) {
-    console.log('locfound');
+    console.log('Location found');
 } else {
     prompt('Allow location access')
 }
 
 L.tileLayer('https://mts1.google.com/vt/lyrs=m@186112443&hl=x-local&src=app&x={x}&y={y}&z={z}&s=Galile', {
-    maxZoom: 20,
+    maxZoom:30,
     attribution: 'Map data &copy; <a href="https://google.com">Google map</a> contributors, ',
+    minZoom:5
+}).addTo(map);
+L.easyButton('fa-location-arrow', function(btn, map){
+   map.setView(mymarker.getLatLng(), 15)
 }).addTo(map);
 
 var carIcon = L.icon({
     iconUrl: "/images/mycar.png",
-    iconSize: [30, 30]
+    iconSize: [50, 50]
 });
 
 map.locate({
     setView: true,
-    maxZoom: 20,
+    maxZoom:25,
     
 });
 
 var options = {
     enableHighAccuracy: true,
-    timeout: 10000,
-    maximumAge: 5000,
+    timeout: 5000,
+    maximumAge: 1000,
 };
 
 
@@ -47,14 +48,14 @@ function _changeLocateMaxZoom(e) {
 }
 
 function onLocationFound(e) {
-    map.setView([e.latlng.lat,e.latlng.lng],15)
+    map.setZoom(19)
      mymarker = L.Marker.movingMarker([
         e.latlng,
         e.latlng
-    ], [50], {
+    ],50, {
         icon: carIcon,
         autostart: true,
-        setZoom: 15
+        setZoom: 25
     }).addTo(map);
 
      socket.emit('init', {
@@ -72,8 +73,7 @@ function onMapClick(e) {
         var latLong = e.latlng;
         var angle = setangle(loc.lat, loc.lng, latLong.lat, latLong.lng)
         mymarker.setIconAngle(angle);
-        mymarker.moveTo([e.latlng.lat, e.latlng.lng], 3000)
-        console.log('lat='+e.latlng.lat+'long'+e.latlng.lng)
+        mymarker.moveTo([e.latlng.lat, e.latlng.lng], 5000)
         socket.emit('locChanged', {
             latLong: [e.latlng.lat, e.latlng.lng]
         });
