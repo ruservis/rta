@@ -14,11 +14,12 @@ if ("geolocation" in navigator) {
 L.tileLayer('https://mts1.google.com/vt/lyrs=m@186112443&hl=x-local&src=app&x={x}&y={y}&z={z}&s=Galile', {
 	attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
 	maxZoom: 20,
-	minZoom: 5
+	minZoom: 5,
+	worldCopyJump: false
 }).addTo(map);
 
-L.easyButton('fa-location-arrow', function(btn, map){
-   map.setView(mymarker.getLatLng(), 15)
+L.easyButton('fa-location-arrow', function(btn, map) {
+	map.setView(mymarker.getLatLng(), 15)
 }).addTo(map);
 
 var carIcon = L.icon({
@@ -32,18 +33,10 @@ var clientIcon = L.icon({
 });
 
 map.locate({
-	setView: true,
 	maxZoom: 15,
-	watch: true
+	watch: true,
+
 });
-
-var options = {
-	enableHighAccuracy: false,
-	timeout: 3000,
-	maximumAge: 2000,
-
-};
-
 
 
 map.on('locationfound', success);
@@ -57,6 +50,7 @@ function _changeLocateMaxZoom(e) {
 
 function init(position) {
 	latLong = getLatLong(position);
+	map.setView(latLong, 15);
 	mymarker = L.Marker.movingMarker([
 		latLong,
 		latLong
@@ -116,17 +110,16 @@ socket.on('driverLocChanged', function(data) {
 function success(pos) {
 	if (!inited)
 		init(pos)
-	else
-	{
-		mymarker.moveTo(getLatLong(pos), 10)
-		mymarker.stop()
+	else {
+
+		mymarker.moveTo(getLatLong(pos), 10000)
 		console.log('here')
 	}
 }
 
 function error(err) {
 	console.log('ERROR ' + err.message);
-	
+
 }
 
 function setangle(slat, slong, dlat, dlong) {

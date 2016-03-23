@@ -1,10 +1,9 @@
-var id;
 var map = L.map('map');
 var socket = io();
 var isDriver = true;
 var mymarker;
 var faker = false;
-
+var inited = false;
 if ("geolocation" in navigator) {
     console.log('Location found');
 } else {
@@ -14,10 +13,10 @@ if ("geolocation" in navigator) {
 L.tileLayer('https://mts1.google.com/vt/lyrs=m@186112443&hl=x-local&src=app&x={x}&y={y}&z={z}&s=Galile', {
     maxZoom: 20,
     attribution: 'Map data &copy; <a href="https://google.com">Google map</a> contributors, ',
-    minZoom:5
+    minZoom: 5
 }).addTo(map);
-L.easyButton('fa-location-arrow', function(btn, map){
-   map.setView(mymarker.getLatLng(), 15)
+L.easyButton('fa-location-arrow', function(btn, map) {
+    map.setView(mymarker.getLatLng(), 15)
 }).addTo(map);
 
 var carIcon = L.icon({
@@ -26,19 +25,12 @@ var carIcon = L.icon({
 });
 
 map.locate({
-    setView: true,
-    maxZoom: 15
+    maxZoom: 15,
+    watch: true
 
 });
 
-var options = {
-    enableHighAccuracy: true,
-    timeout: 10000,
-    maximumAge: 1000,
-};
-
-map.on('locationfound', onLocationFound);
-
+map.on('locationfound', success);
 map.on('click', onMapClick)
 map.on('zoomend', _changeLocateMaxZoom);
 
@@ -48,19 +40,23 @@ function _changeLocateMaxZoom(e) {
     }
 }
 
-function onLocationFound(e) {
-
-    mymarker = L.Marker.movingMarker([e.latlng, e.latlng], [50], {
-        icon: carIcon,
+function init(position) {
+    latLong = getLatLong(position);
+    map.setView(latLong, 15);
+    mymarker = L.Marker.movingMarker([
+        latLong,
+        latLong
+    ], 0, {
         autostart: true,
-        zoom: 15
+        zoom: 15,
+        icon: carIcon
     }).addTo(map);
+
     socket.emit('init', {
         isDriver: isDriver,
-        latLong: e.latlng
+        latLong: latLong
     });
-    id =
-        navigator.geolocation.watchPosition(success, error, options);
+    inited = true;
 }
 
 
@@ -79,15 +75,19 @@ function onMapClick(e) {
 }
 
 function success(position) {
-    var loc = mymarker.getLatLng();
-    var latLong = getLatLong(position)
-    var angle = setangle(loc.lat, loc.lng, latLong[0], latLong[1])
-    mymarker.setIconAngle(angle);
-    mymarker.moveTo(latLong, 3000)
-    console.log('moved')
-    socket.emit('locChanged', {
-        latLong: latLong
-    });
+    if (!inited)
+        init(position)
+    else {
+        var loc = mymarker.getLatLng();
+        var latLong = getLatLong(position)
+        var angle = setangle(loc.lat, loc.lng, latLong[0], latLong[1])
+        mymarker.setIconAngle(angle);
+        mymarker.moveTo(latLong, 5000)
+        console.log('moved')
+        socket.emit('locChanged', {
+            latLong: latLong
+        });
+    }
 }
 
 function setangle(slat, slong, dlat, dlong) {
@@ -107,5 +107,5 @@ function error(err) {
 
 
 function getLatLong(position) {
-    return ([position.coords.latitude, position.coords.longitude])
+    return ([position.latitude, position.longitude])
 }

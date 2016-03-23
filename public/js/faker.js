@@ -30,12 +30,6 @@ map.locate({
     
 });
 
-var options = {
-    enableHighAccuracy: true,
-    timeout: 5000,
-    maximumAge: 1000,
-};
-
 
 map.on('locationfound', onLocationFound);
 map.on('click', onMapClick)
