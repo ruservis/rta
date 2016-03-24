@@ -1,35 +1,12 @@
-var map = L.map('map');
-var socket = io();
 var isDriver = true;
-var mymarker;
 var faker = true;
-
-if ("geolocation" in navigator) {
-    console.log('Location found');
-} else {
-    prompt('Allow location access')
-}
-
-L.tileLayer('https://mts1.google.com/vt/lyrs=m@186112443&hl=x-local&src=app&x={x}&y={y}&z={z}&s=Galile', {
-    maxZoom:30,
-    attribution: 'Map data &copy; <a href="https://google.com">Google map</a> contributors, ',
-    minZoom:5
-}).addTo(map);
-L.easyButton('fa-location-arrow', function(btn, map){
-   map.setView(mymarker.getLatLng(), 15)
-}).addTo(map);
-
-var carIcon = L.icon({
-    iconUrl: "/images/mycar.png",
-    iconSize: [50, 50]
-});
+var socket = io();
 
 map.locate({
     setView: true,
     maxZoom:25,
     
 });
-
 
 map.on('locationfound', onLocationFound);
 map.on('click', onMapClick)
@@ -59,7 +36,6 @@ function onLocationFound(e) {
 
 }
 
-
 function onMapClick(e) {
     if (faker == true) {
      
@@ -74,8 +50,6 @@ function onMapClick(e) {
     }
 }
 
-
-
 function setangle(slat, slong, dlat, dlong) {
 
     var dLon = (dlong - slong);
@@ -86,7 +60,6 @@ function setangle(slat, slong, dlat, dlong) {
     angle1 = (angle1 + 360) % 360;
     return angle1;
 }
-
 
 function getLatLong(position) {
     return ([position.latitude, position.longitude])

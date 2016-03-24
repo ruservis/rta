@@ -20,7 +20,6 @@ app.get('/driver', function(req, res) {
 
 io.on('connection', function(socket) {
 
-
 	socket.on('init', function(data) {
 		if (data.isDriver) {
 			drivers[socket.id] = {
@@ -40,7 +39,7 @@ io.on('connection', function(socket) {
 			id: socket.id,
 			latLong: data.latLong
 		}
-		
+
 		socket.broadcast.emit('driverLocChanged', {
 			id: socket.id,
 			latLong: data.latLong
