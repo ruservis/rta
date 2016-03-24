@@ -73,7 +73,11 @@ socket.on('driverRemoved', function(driver) {
 socket.on('driverLocChanged', function(data) {
 	var loc = mymarker.getLatLng();
 	var angle = setangle(loc.lat, loc.lng, data.latLong[0], data.latLong[1])
-	markers[data.id].setIconAngle(angle)
+	
+	console.log('lat1'+loc.lat+'lng2='+loc.lng)
+	console.log('lat='+data.latLong[0]+'lng='+data.latLong[1])
+	console.log('angle='+angle)
+	markers[data.id].setIconAngle(angle,{rotationOrigin:'bottom center'})
 	markers[data.id].moveTo(data.latLong, 5000)
 })
 
@@ -81,9 +85,7 @@ function success(pos) {
 	if (!inited)
 		init(pos)
 	else {
-
 		mymarker.moveTo(getLatLong(pos), 5000)
-
 	}
 }
 
@@ -94,14 +96,15 @@ function error(err) {
 
 function setangle(slat, slong, dlat, dlong) {
 
-	var dLon = (dlong - slong);
-	var y = Math.sin(dLon) * Math.cos(dlat);
-	var x = Math.cos(slat) * Math.sin(dlat) - Math.sin(slat) * Math.cos(dlat) * Math.cos(dLon);
+	var y = Math.sin(e(dlong - slong)) * Math.cos(e(dlat));
+	var x = (Math.cos(e(slat)) * Math.sin(e(dlat)))- (Math.sin(e(slat)) * Math.cos(e(dlat)) * Math.cos(e(dlong - slong)));
 	angle1 = Math.atan2(y, x);
-	angle1 = (180 * angle1) / 3.1454;
-	angle1 = (angle1 + 360) % 360;
+	angle1 = 180*angle1/Math.PI;
 	return angle1;
 }
+function e(a) {
+        return (a * (Math.PI / 180));
+    }
 
 function getLatLong(position) {
 	return ([position.latitude, position.longitude])

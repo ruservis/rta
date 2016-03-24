@@ -24,7 +24,8 @@ io.on('connection', function(socket) {
 		if (data.isDriver) {
 			drivers[socket.id] = {
 				id: socket.id,
-				latLong: data.latLong
+				latLong: data.latLong,
+				isDriver: data.isDriver
 			};
 			console.log("Driver Added at " + socket.id);
 			socket.broadcast.to('customers').emit('driverAdded', drivers[socket.id]);
@@ -47,9 +48,13 @@ io.on('connection', function(socket) {
 	});
 
 	socket.on('disconnect', function() {
-		console.log("Driver disconnected at " + socket.id);
-		socket.broadcast.to('customers').emit('driverRemoved', drivers[socket.id]);
-		delete drivers[socket.id];
+		if (socket.id) {
+			console.log("Driver disconnected at " + socket.id);
+			socket.broadcast.to('customers').emit('driverRemoved', drivers[socket.id]);
+			delete drivers[socket.id];
+		} else {
+			console.log('Customer Disconnected at' + socket.id);
+		}
 	});
 
 });

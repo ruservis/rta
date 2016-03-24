@@ -42,6 +42,7 @@ function onMapClick(e) {
         var loc = mymarker.getLatLng();
         var latLong = e.latlng;
         var angle = setangle(loc.lat, loc.lng, latLong.lat, latLong.lng)
+        console.log(e.latlng)
         mymarker.setIconAngle(angle);
         mymarker.moveTo([e.latlng.lat, e.latlng.lng], 5000)
         socket.emit('locChanged', {
