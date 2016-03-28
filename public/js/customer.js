@@ -6,7 +6,7 @@ var socket = io();
 map.locate({
 	maxZoom: 15,
 	watch: true,
-
+	enableHighAccuracy: true
 });
 
 map.on('locationfound', success);
