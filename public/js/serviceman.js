@@ -19,7 +19,7 @@ test=L.Routing.control({
   ]
 }).addTo(map);
 
-console.log(test._routes[0])
+console.log(test)
 
 
 function init(position) {
