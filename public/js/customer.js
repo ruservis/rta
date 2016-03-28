@@ -20,6 +20,7 @@ function _changeLocateMaxZoom(e) {
 
 function init(position) {
 	latLong = getLatLong(position);
+	console.log(position)
 	map.setView(latLong, 15);
 	mymarker = L.Marker.movingMarker([
 		latLong,
@@ -81,6 +82,7 @@ function success(pos) {
 	if (!inited)
 		init(pos)
 	else {
+
 		mymarker.moveTo(getLatLong(pos), 5000)
 	}
 }

@@ -18,6 +18,10 @@ app.get('/driver', function(req, res) {
 	res.sendFile(__dirname + '/views/drive.html');
 });
 
+app.get('/serviceman', function(req, res) {
+	res.sendFile(__dirname + '/views/serviceman.html');
+});
+
 io.on('connection', function(socket) {
 
 	socket.on('init', function(data) {
