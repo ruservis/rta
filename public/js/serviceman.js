@@ -2,7 +2,7 @@ var isDriver = false;
 var markers = {};
 var inited = false;
 var socket = io();
-var $errorPage = $('.error.page');
+
 map.locate({
     maxZoom: 15,
     watch: true,
@@ -63,7 +63,7 @@ socket.on('carid', function(id) {
     if (id == 0)
         confirm("No cars available")
     else {
-        $errorPage.show();
+
         L.Routing.control({
             waypoints: [
                 L.latLng(mymarker.getLatLng()),
