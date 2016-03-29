@@ -29,7 +29,7 @@ var clientIcon = L.icon({
 });
 
 var serviceIcon = L.icon({
-	iconUrl: "/images/person.png",
+	iconUrl: "/images/shape.png",
 	iconSize: [30, 30]
 });
 
