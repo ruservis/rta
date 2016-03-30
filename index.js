@@ -3,6 +3,7 @@ var app = express();
 var server = require('http').Server(app)
 var io = require('socket.io')(server);
 var drivers = {};
+var service = {};
 
 app.use(express.static(__dirname + '/public'));
 
@@ -41,34 +42,85 @@ io.on('connection', function(socket) {
 		}
 	});
 
-	socket.on('bookride', function(mymarker) {
+	socket.on('initservice', function(data) {
+		if (data.isservice) {
+			service[socket.id] = {
+				id: socket.id,
+				latLong: data.latLong
+
+			};
+			socket.isservice = data.isservice;
+			console.log("serviceman Added at " + socket.id);
+			socket.broadcast.to('customers').emit('servicemanAdded', service[socket.id]);
+		} else {
+			socket.join('customers');
+			socket.emit('initservicerLoc', service);
+
+		}
+	});
+
+
+	socket.on('book', function(mymarker) {
 		var near = 0,length, nr = 0;
 		var at, id, key;
-		at = Object.keys(drivers);
-		length = Object.keys(drivers).length;
-		id = at[0];
 		var lat1 = mymarker.lat;
 		var long1 = mymarker.lng;
 		var lat2, long2;
-		if (length == 0)
-			id = 0;
-		else if (length == 1) {
+		var details={};
+		if (mymarker[1] == 0) {
+			at = Object.keys(drivers);
 			id = at[0];
-		} else {
-			for (key in at) {
-				console.log('id=' + at[key])
-				lat2 = drivers[at[key]].latLong[0]
-				long2 = drivers[at[key]].latLong[1]
-				nr = distance(lat1, long1, lat2, long2);
+			length = Object.keys(drivers).length;
+			if (length == 0)
+				id = 0;
+			else if (length == 1) {
+				id = at[0];
+			} else {
+				for (key in at) {
+					console.log('id=' + at[key])
+					lat2 = drivers[at[key]].latLong[0]
+					long2 = drivers[at[key]].latLong[1]
+					nr = distance(lat1, long1, lat2, long2);
 
-				if (nr < near) {
-					near = nr;
-					id = key;
+					if (nr < near) {
+						near = nr;
+						id = key;
+					}
 				}
 			}
 		}
-		socket.emit('carid', id);
+		 else {
+			at = Object.keys(service);
+			id = at[0];
+			length = Object.keys(service).length;
+			if (length == 0)
+				id = 0;
+			else if (length == 1) {
+				id = at[0];
+			} else {
+				for (key in at) {
+					console.log('id=' + at[key])
+					lat2 = service[at[key]].latLong[0]
+					long2 = service[at[key]].latLong[1]
+					nr = distance(lat1, long1, lat2, long2);
+
+					if (nr < near) {
+						near = nr;
+						id = key;
+					}
+				}
+			}
+		}
+		details[0]=id;
+		details[1]=mymarker[1];
+		socket.emit('bookid', details);
+		if(details[1]==0)
+		{drivers[id].emit('drivepath', details);
+		console.log(drivers[id]);}
+		else
+		service[id].emit('servicepath', details);
 	});
+
 
 	socket.on('locChanged', function(data) {
 		drivers[socket.id] = {
@@ -82,12 +134,30 @@ io.on('connection', function(socket) {
 		})
 	});
 
+	socket.on('servicelocChanged', function(data) {
+		service[socket.id] = {
+			id: socket.id,
+			latLong: data.latLong
+		}
+
+		socket.broadcast.emit('serviceLocChanged', {
+			id: socket.id,
+			latLong: data.latLong
+		})
+	});
+
 	socket.on('disconnect', function() {
 		if (socket.isDriver) {
 			console.log("Driver disconnected at " + socket.id);
 			socket.broadcast.to('customers').emit('driverRemoved', drivers[socket.id]);
 			delete drivers[socket.id];
-		} else {
+		}
+		if (socket.isservice) {
+			console.log("service disconnected at " + socket.id);
+			socket.broadcast.to('customers').emit('serviceRemoved', service[socket.id]);
+			delete service[socket.id];
+		} 
+		 else {
 			console.log('Customer Disconnected at' + socket.id);
 		}
 	});
@@ -103,6 +173,6 @@ function distance(lat1, lon1, lat2, lon2) {
 	return 12742 * Math.asin(Math.sqrt(a));
 }
 
-server.listen(8080, function() {
+server.listen(8085, function() {
 	console.log('Server started at ' + (new Date().toLocaleString().substr(10, 12)));
 });

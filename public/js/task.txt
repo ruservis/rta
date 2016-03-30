@@ -1,0 +1,3 @@
+remove path from customer and add to service
+show only booked car
+keep updating position of serviceman

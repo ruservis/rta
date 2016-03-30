@@ -1,12 +1,12 @@
-var isDriver = false;
-var markers = {};
-var inited = false;
 var socket = io();
+var isservice = true;
+var faker = false;
+var inited = false;
 
 map.locate({
     maxZoom: 15,
     watch: true,
-    enableHighAccuracy: true
+
 });
 
 map.on('locationfound', success);
@@ -30,103 +30,39 @@ function init(position) {
         icon: serviceIcon
     }).addTo(map);
 
-    socket.emit('init', {
-        isDriver: isDriver,
+    socket.emit('initservice', {
+        isservice: isservice,
         latLong: latLong
     });
     inited = true;
-
 }
 
-socket.on('initDriverLoc', function(drivers) {
-
-    _.each(drivers, function(driver) {
-
-        markers[driver.id] = L.Marker.movingMarker([
-            driver.latLong,
-            driver.latLong
-        ], [0], {
-            icon: carIcon,
-            autostart: true,
-            zoom: 15
-        }).addTo(map);
-    });
-
-});
-
-function nearby() {
-
-    socket.emit('bookride', mymarker.getLatLng());
-}
-
-socket.on('carid', function(id) {
-    if (id == 0)
-        confirm("No cars available")
-    else {
-
-        L.Routing.control({
-            waypoints: [
-                L.latLng(mymarker.getLatLng()),
-                L.latLng(markers[id].getLatLng())
-            ]
-        }).addTo(map);
-    }
-});
-
-socket.on('driverAdded', function(driver) {
-    console.log("New driver joined.")
-    markers[driver.id] = L.Marker.movingMarker([
-        driver.latLong,
-        driver.latLong
-    ], [0], {
-        icon: carIcon,
-        autostart: true,
-        zoom: 15
-    }).addTo(map);
-
-});
-
-socket.on('driverRemoved', function(driver) {
-    console.log("driver left.")
-    map.removeLayer(markers[driver.id])
-
-});
-
-socket.on('driverLocChanged', function(data) {
-    var loc = markers[data.id].getLatLng();
-    var angle = setangle(loc.lat, loc.lng, data.latLong[0], data.latLong[1])
-    markers[data.id].setIconAngle(angle)
-    markers[data.id].moveTo(data.latLong, 5000)
-
-})
-
-
-function success(pos) {
+function success(position) {
     if (!inited)
-        init(pos)
+        init(position)
     else {
-        mymarker.moveTo(getLatLong(pos), 5000)
+        var loc = mymarker.getLatLng();
+        var latLong = getLatLong(position)
+        mymarker.moveTo(latLong, 5000)
+        socket.emit('servicelocChanged', {
+            latLong: latLong
+        });
     }
 }
 
+socket.on('servicepath',function(id){
+L.Routing.control({
+                    waypoints: [
+                        L.latLng(mymarker.getLatLng()),
+                        L.latLng(markers[id[0]].getLatLng())
+                    ]
+                }).addTo(map);
+});
 
 function error(err) {
     console.log('ERROR ' + err.message);
 }
 
-function setangle(slat, slong, dlat, dlong) {
-
-    var y = Math.sin((dlong - slong)) * Math.cos((dlat));
-    var x = (Math.cos((slat)) * Math.sin((dlat))) - (Math.sin((slat)) * Math.cos((dlat)) * Math.cos((dlong - slong)));
-    angle1 = Math.atan2(y, x);
-    angle1 = 180 * angle1 / Math.PI;
-    return angle1;
-}
-
 function getLatLong(position) {
     return ([position.latitude, position.longitude])
-}
-
-function loading() {
-    document.getElementById("load").style.display = 'none';
 }

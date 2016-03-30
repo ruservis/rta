@@ -19,6 +19,16 @@ function _changeLocateMaxZoom(e) {
     }
 }
 
+socket.on('drivepath',function(id){
+    console.log('driver');
+ L.Routing.control({
+                    waypoints: [
+                        L.latLng(mymarker.getLatLng()),
+                        L.latLng(markers[id[0]].getLatLng())
+                    ]
+                }).addTo(map);
+});
+
 function init(position) {
     latLong = getLatLong(position);
     map.setView(latLong, 15);
