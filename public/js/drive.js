@@ -19,15 +19,16 @@ function _changeLocateMaxZoom(e) {
     }
 }
 
-socket.on('drivepath',function(id){
-    console.log('driver');
- L.Routing.control({
-                    waypoints: [
-                        L.latLng(mymarker.getLatLng()),
-                        L.latLng(markers[id[0]].getLatLng())
-                    ]
-                }).addTo(map);
-});
+L.easyButton('fa fa-toggle-on', function(btn, map) {
+    faker = true;
+    map.stopLocate();
+}).addTo(map);
+
+L.easyButton('fa fa-toggle-off', function(btn, map) {
+    faker = false;
+    map.locate();
+}).addTo(map);
+
 
 function init(position) {
     latLong = getLatLong(position);
@@ -76,6 +77,19 @@ function success(position) {
         });
     }
 }
+socket.on('drivepath', function(id) {
+
+    L.Routing.control({
+        waypoints: [
+            L.latLng(mymarker.getLatLng()),
+            L.latLng(id.lat, id.lng)
+        ],
+    
+        createMarker: function() {
+            return null;
+        }
+        }).addTo(map);
+});
 
 function setangle(slat, slong, dlat, dlong) {
 

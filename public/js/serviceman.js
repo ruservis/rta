@@ -54,8 +54,9 @@ socket.on('servicepath',function(id){
 L.Routing.control({
                     waypoints: [
                         L.latLng(mymarker.getLatLng()),
-                        L.latLng(markers[id[0]].getLatLng())
-                    ]
+                          L.latLng(id.lat,id.lng)
+                    ],
+                     createMarker: function() { return null; } 
                 }).addTo(map);
 });
 

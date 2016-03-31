@@ -111,14 +111,13 @@ io.on('connection', function(socket) {
 				}
 			}
 		}
-		details[0]=id;
-		details[1]=mymarker[1];
+		details[0]=id;	// id of booked car/service
+		details[1]=mymarker[1];	//type 0 for cab or 1 for service
 		socket.emit('bookid', details);
 		if(details[1]==0)
-		{drivers[id].emit('drivepath', details);
-		console.log(drivers[id]);}
+		socket.to(id).emit('drivepath', mymarker[0]);
 		else
-		service[id].emit('servicepath', details);
+		socket.to(id).emit('servicepath', mymarker[0]);
 	});
 
 

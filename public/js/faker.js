@@ -4,8 +4,8 @@ var socket = io();
 
 map.locate({
     setView: true,
-    maxZoom:25,
-    
+    maxZoom: 25,
+
 });
 
 map.on('locationfound', onLocationFound);
@@ -18,27 +18,30 @@ function _changeLocateMaxZoom(e) {
     }
 }
 
+
 function onLocationFound(e) {
     map.setZoom(19)
-     mymarker = L.Marker.movingMarker([
+    mymarker = L.Marker.movingMarker([
         e.latlng,
         e.latlng
-    ],50, {
+    ], 50, {
         icon: carIcon,
         autostart: true,
         setZoom: 25
     }).addTo(map);
 
-     socket.emit('init', {
+    socket.emit('init', {
         isDriver: isDriver,
         latLong: e.latlng
     });
 
 }
 
+
+
 function onMapClick(e) {
     if (faker == true) {
-     
+
         var loc = mymarker.getLatLng();
         var latLong = e.latlng;
         var angle = setangle(loc.lat, loc.lng, latLong.lat, latLong.lng)
@@ -49,6 +52,8 @@ function onMapClick(e) {
         });
     }
 }
+
+
 
 function setangle(slat, slong, dlat, dlong) {
 
@@ -64,3 +69,4 @@ function setangle(slat, slong, dlat, dlong) {
 function getLatLong(position) {
     return ([position.latitude, position.longitude])
 }
+

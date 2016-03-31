@@ -1,6 +1,7 @@
 var map=L.map('map')
 var mymarker;
 
+
 if ("geolocation" in navigator) {
 	console.log('Location found');
 } else {

@@ -20,12 +20,6 @@ function _changeLocateMaxZoom(e) {
 	}
 }
 
-function _changeLocateMaxZoom(e) {
-	if (map._locateOptions) {
-		map._locateOptions.maxZoom = map.getZoom();
-	}
-}
-
 function init(position) {
 	latLong = getLatLong(position);
 	map.setView(latLong, 15);
@@ -149,44 +143,45 @@ function nearby(data) {
 
 socket.on('bookid', function(id) {
 
-			if (id[0] == 0) {
-				confirm("Not available")
-			} else {
-				var time = L.Routing.control({
-					waypoints: [
-						L.latLng(mymarker.getLatLng()),
-						L.latLng(markers[id[0]].getLatLng())
-					]
-				});
+	if (id[0] == 0) {
+		confirm("Not available")
+	} else {
+		var time = L.Routing.control({
+			waypoints: [
+				L.latLng(mymarker.getLatLng()),
+				L.latLng(markers[id[0]].getLatLng())
+			]
+		});
 
-				if (id[1] == 0)
-					confirm('Your Ride has been booked');
-				if (id[1] == 1)
-					confirm('Your Service has been booked');
+		if (id[1] == 0)
+			confirm('Your Ride has been booked');
+		if (id[1] == 1)
+			confirm('Your Service has been booked');
 
-				for (key in markers) {
-					if (markers[id[0]].getLatLng() != markers[key].getLatLng())
-						map.removeLayer(markers[key]);
-				}
-					setTimeout(function() {
-						markers[id[0]].bindPopup(time._routes[0].summary.totalTime + 'Seconds away').openPopup();
-					}, 2000);
-				}
-			});
-
-		function error(err) {
-			console.log('ERROR ' + err.message);
+		for (key in markers) {
+			if (markers[id[0]].getLatLng() != markers[key].getLatLng())
+				map.removeLayer(markers[key]);
 		}
+		setTimeout(function() {
+			markers[id[0]].bindPopup((Math.round(time._routes[0].summary.totalTime/60)) + ' Minutes away ').openPopup();
+		}, 2000);
+	}
+});
 
-		function setangle(slat, slong, dlat, dlong) {
+function error(err) {
+	console.log('ERROR ' + err.message);
+}
 
-			var y = Math.sin((dlong - slong)) * Math.cos((dlat));
-			var x = (Math.cos((slat)) * Math.sin((dlat))) - (Math.sin((slat)) * Math.cos((dlat)) * Math.cos((dlong - slong)));
-			angle1 = Math.atan2(y, x);
-			angle1 = 180 * angle1 / Math.PI;
-			return angle1;
-		}
+function setangle(slat, slong, dlat, dlong) {
 
-		function getLatLong(position) {
-			return ([position.latitude, position.longitude])
-		}
+	var y = Math.sin((dlong - slong)) * Math.cos((dlat));
+	var x = (Math.cos((slat)) * Math.sin((dlat))) - (Math.sin((slat)) * Math.cos((dlat)) * Math.cos((dlong - slong)));
+	angle1 = Math.atan2(y, x);
+	angle1 = 180 * angle1 / Math.PI;
+	return angle1;
+}
+
+function getLatLong(position) {
+	return ([position.latitude, position.longitude])
+}
+
