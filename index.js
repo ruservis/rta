@@ -1,5 +1,5 @@
 var express = require('express');
-var app = express();
+var app = express();	//instance of express
 var server = require('http').Server(app)
 var io = require('socket.io')(server);
 var drivers = {};
@@ -37,7 +37,7 @@ io.on('connection', function(socket) {
 			socket.broadcast.to('customers').emit('driverAdded', drivers[socket.id]);
 		} else {
 			socket.join('customers');
-			socket.emit('initDriverLoc', drivers);
+			socket.emit('initDriverLoc', drivers);	//event to list all drivers on the customer's map
 
 		}
 	});
