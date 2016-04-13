@@ -28,4 +28,4 @@ If everything goes right,you will be able to see the folllowing in your browser 
 ![cust.png](https://bitbucket.org/repo/BEAdzn/images/2749527380-cust.png)
 
 ## Contributions ##
-Leaflet, Node.js, Express,Socket.io and Uber
+Leaflet, Node.js, Express,Socket.io,Google for MapTiles and Uber for their cool driver icon.
