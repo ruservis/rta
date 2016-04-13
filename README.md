@@ -1,29 +1,18 @@
 # Uber Simulation #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+This application is basically a prototype of real-time taxi aggregators and service providers like Ola or Uber built using Node.js, Leaflet and Socket.io. Along with cab service we have also included booking daily needs Service facility such as food or grocery delivery. Hence you can book both service and cab on the go.This project was developed with leaflet version 0.7.7, express version 4.13.4 and socket.io version 1.4.5.
 
-### What is this repository for? ###
+Getting started
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+**Prerequisites**
+* git
+* Node.js and Npm
 
-### How do I get set up? ###
+Installation
+1. Run npm install to install all server dependencies.
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+Build & development
 
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+Run node index.js to start the development server and open up the respective url(Customer,driver,faker or serviceman) like localhost:8085/customer in your browser.
+If everything goes right,you will be able to see the folllowing in your browser window
+![cust.png](https://bitbucket.org/repo/BEAdzn/images/2749527380-cust.png)
