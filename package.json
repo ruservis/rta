@@ -15,7 +15,7 @@
     "and",
     "leaflet"
   ],
-  "author": "akshay",
+  "author": "cronj-dev",
   "license": "ISC",
   "homepage": "https://bitbucket.org/cronj-dev/uber#readme",
   "dependencies": {

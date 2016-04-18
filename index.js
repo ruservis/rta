@@ -1,5 +1,12 @@
+/**
+#Author: 	CronJ IT Technologies Private Limited
+#Website: 	www.cronj.com
+#Title: 	Uber-X
+**/
+
+
 var express = require('express');
-var app = express();	//instance of express
+var app = express();
 var server = require('http').Server(app)
 var io = require('socket.io')(server);
 var drivers = {};
@@ -23,9 +30,10 @@ app.get('/serviceman', function(req, res) {
 	res.sendFile(__dirname + '/views/serviceman.html');
 });
 
+//io.on listens for connections initially when socket is created between server and client(customer/driver)
 io.on('connection', function(socket) {
 
-	socket.on('init', function(data) {
+	socket.on('init', function(data) {		//Init is one of our custom events which is fired when any of the driver comes online.
 		if (data.isDriver) {
 			drivers[socket.id] = {
 				id: socket.id,
@@ -37,7 +45,7 @@ io.on('connection', function(socket) {
 			socket.broadcast.to('customers').emit('driverAdded', drivers[socket.id]);
 		} else {
 			socket.join('customers');
-			socket.emit('initDriverLoc', drivers);	//event to list all drivers on the customer's map
+			socket.emit('initDriverLoc', drivers);
 
 		}
 	});
@@ -59,7 +67,7 @@ io.on('connection', function(socket) {
 		}
 	});
 
-
+//book event is used to handle both Service and Cab booking
 	socket.on('book', function(mymarker) {
 		var near = 0,length, nr = 0;
 		var at, id, key;
@@ -120,12 +128,13 @@ io.on('connection', function(socket) {
 		socket.to(id).emit('servicepath', mymarker[0]);
 	});
 
-
+//locChanged is an event which is fired when the location of any driver changes
 	socket.on('locChanged', function(data) {
 		drivers[socket.id] = {
 			id: socket.id,
 			latLong: data.latLong
 		}
+
 
 		socket.broadcast.emit('driverLocChanged', {
 			id: socket.id,
@@ -133,6 +142,7 @@ io.on('connection', function(socket) {
 		})
 	});
 
+//servicelocChanged is similar to previous “locChanged”and perform similar update operation of service list
 	socket.on('servicelocChanged', function(data) {
 		service[socket.id] = {
 			id: socket.id,
@@ -145,6 +155,7 @@ io.on('connection', function(socket) {
 		})
 	});
 
+//disconnect listens to the event if any driver/serviceman/customer goes offline, updates the corresponding list and broadcast's it
 	socket.on('disconnect', function() {
 		if (socket.isDriver) {
 			console.log("Driver disconnected at " + socket.id);
@@ -162,6 +173,7 @@ io.on('connection', function(socket) {
 	});
 });
 
+//distance” function finds out the nearest cab/serviceman from customer
 function distance(lat1, lon1, lat2, lon2) {
 	var p = 0.017453292519943295;
 	var c = Math.cos;

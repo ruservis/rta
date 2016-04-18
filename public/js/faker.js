@@ -1,24 +1,33 @@
+/**
+#Author:    CronJ IT Technologies Private Limited
+#Website:   www.cronj.com
+#Title:     Uber-X
+**/
+
 var isDriver = true;
 var faker = true;
 var socket = io();
 
+//Allows to locate user using Geolocation API firing a locationfound event with location data on success or a locationerror event on failure
 map.locate({
     setView: true,
     maxZoom: 25,
 
 });
 
+//Events
 map.on('locationfound', onLocationFound);
 map.on('click', onMapClick)
 map.on('zoomend', _changeLocateMaxZoom);
 
+//Detects when map finishes zooming
 function _changeLocateMaxZoom(e) {
     if (map._locateOptions) {
         map._locateOptions.maxZoom = map.getZoom();
     }
 }
 
-
+//Initialise fake driver first location 
 function onLocationFound(e) {
     map.setZoom(19)
     mymarker = L.Marker.movingMarker([
@@ -37,8 +46,7 @@ function onLocationFound(e) {
 
 }
 
-
-
+//function to move the driver to the clicked position on the map.
 function onMapClick(e) {
     if (faker == true) {
 
@@ -53,8 +61,7 @@ function onMapClick(e) {
     }
 }
 
-
-
+//set angle of the car marker for animation on the map
 function setangle(slat, slong, dlat, dlong) {
 
     var dLon = (dlong - slong);
@@ -66,6 +73,7 @@ function setangle(slat, slong, dlat, dlong) {
     return angle1;
 }
 
+//function to return latlong 
 function getLatLong(position) {
     return ([position.latitude, position.longitude])
 }
