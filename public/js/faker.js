@@ -78,3 +78,16 @@ function getLatLong(position) {
     return ([position.latitude, position.longitude])
 }
 
+socket.on('drivepath', function(id) {
+    //drawing path from drivers location to customer location and showing it to the driver
+    L.Routing.control({
+        waypoints: [
+            L.latLng(mymarker.getLatLng()),
+            L.latLng(id.lat, id.lng)
+        ],
+
+        createMarker: function() {
+            return null;
+        }
+    }).addTo(map);
+});
