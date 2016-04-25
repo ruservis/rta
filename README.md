@@ -29,3 +29,5 @@ If everything goes right,you will be able to see the folllowing in your browser 
 
 ## Contributions ##
 Leaflet, Node.js, Express,Socket.io,Google for MapTiles and Uber for their cool driver icon.
+
+**Read complete details here:** [https://www.cronj.com/blog/uber-for-x-prototype/ ](Link URL)
