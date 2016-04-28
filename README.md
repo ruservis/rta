@@ -3,10 +3,10 @@
 This application is basically a prototype of real-time taxi aggregators and service providers like Ola or Uber built using Node.js, Leaflet and Socket.io. Along with cab service we have also included booking daily needs Service facility such as food or grocery delivery. Hence you can book both service and cab on the go.This project was developed with leaflet version 0.7.7, express version 4.13.4 and socket.io version 1.4.5.
 
 ## Getting started ##
-Demos:[Customer](52.76.103.243:8085/customer),
-[Driver](52.76.103.243:8085/driver),
-[Serviceman](52.76.103.243:8085/serviceman),
-[Faker](52.76.103.243:8085/faker),
+Demos:[Customer](https://52.76.103.243:8085/customer),
+[Driver](https://52.76.103.243:8085/driver),
+[Serviceman](https://52.76.103.243:8085/serviceman),
+[Faker](https://52.76.103.243:8085/faker),
 
 ## Prerequisites ##
 1. Git
