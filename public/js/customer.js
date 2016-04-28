@@ -9,7 +9,7 @@ var inited = false;
 var socket = io();
 var isservice = false;
 var send = {};
-var key;
+var key, eta, bookid;
 //Allows to locate user using Geolocation API firing a locationfound event with location data on success or a locationerror event on failure
 map.locate({
 	maxZoom: 15,
@@ -158,29 +158,38 @@ function nearby(data) {
 }
 
 socket.on('bookid', function(id) {
+	//To check booking of same cab again
+	if (bookid == id[0])
+		confirm("You cannot book same service again");
+	else {
 
-	if (id[0] == 0) {
-		confirm("Not available")
-	} else {
-		var time = L.Routing.control({
-			waypoints: [
-				L.latLng(mymarker.getLatLng()),
-				L.latLng(markers[id[0]].getLatLng())
-			]
-		});
+		if (id[0] == 0)
+			confirm("Not available")
+		else {
+			var time = L.Routing.control({
+				waypoints: [
+					L.latLng(mymarker.getLatLng()),
+					L.latLng(markers[id[0]].getLatLng())
+				]
+			});
 
-		if (id[1] == 0)
-			confirm('Your Ride has been booked');
-		if (id[1] == 1)
-			confirm('Your Service has been booked');
+			if (id[1] == 0)
+				confirm('Your Ride has been booked');
+			if (id[1] == 1)
+				confirm('Your Service has been booked');
 
-		for (key in markers) {
-			if (markers[id[0]].getLatLng() != markers[key].getLatLng())
-				map.removeLayer(markers[key]);
+			for (key in markers) {
+				if (markers[id[0]].getLatLng() != markers[key].getLatLng())
+					map.removeLayer(markers[key]);
+			}
+			setTimeout(function() {
+				eta = Math.round(time._routes[0].summary.totalTime / 60);
+				if (eta == 0)	//if time rounds off to 0 minutes
+					eta++;
+				markers[id[0]].bindPopup(eta + ' Minutes away ').openPopup();
+			}, 2000);
 		}
-		setTimeout(function() {
-			markers[id[0]].bindPopup((Math.round(time._routes[0].summary.totalTime/60)) + ' Minutes away ').openPopup();
-		}, 2000);
+		bookid = id[0];
 	}
 });
 

@@ -11,7 +11,7 @@ var server = require('http').Server(app)
 var io = require('socket.io')(server);
 var drivers = {};
 var service = {};
-
+var bookid;
 app.use(express.static(__dirname + '/public'));
 
 app.get('/customer', function(req, res) {
@@ -33,7 +33,7 @@ app.get('/serviceman', function(req, res) {
 //io.on listens for connections initially when socket is created between server and client(customer/driver)
 io.on('connection', function(socket) {
 
-	socket.on('init', function(data) {		//Init is one of our custom events which is fired when any of the driver comes online.
+	socket.on('init', function(data) { //Init is one of our custom events which is fired when any of the driver comes online.
 		if (data.isDriver) {
 			drivers[socket.id] = {
 				id: socket.id,
@@ -58,7 +58,7 @@ io.on('connection', function(socket) {
 
 			};
 			socket.isservice = data.isservice;
-			console.log("serviceman Added at " + socket.id);
+			console.log("Serviceman Added at " + socket.id);
 			socket.broadcast.to('customers').emit('servicemanAdded', service[socket.id]);
 		} else {
 			socket.join('customers');
@@ -67,14 +67,15 @@ io.on('connection', function(socket) {
 		}
 	});
 
-//book event is used to handle both Service and Cab booking
+	//book event is used to handle both Service and Cab booking
 	socket.on('book', function(mymarker) {
-		var near = 0,length, nr = 0;
+		var near = 0,
+			length, nr = 0;
 		var at, id, key;
 		var lat1 = mymarker.lat;
 		var long1 = mymarker.lng;
 		var lat2, long2;
-		var details={};
+		var details = {};
 		if (mymarker[1] == 0) {
 			at = Object.keys(drivers);
 			id = at[0];
@@ -96,8 +97,7 @@ io.on('connection', function(socket) {
 					}
 				}
 			}
-		}
-		 else {
+		} else {
 			at = Object.keys(service);
 			id = at[0];
 			length = Object.keys(service).length;
@@ -119,16 +119,20 @@ io.on('connection', function(socket) {
 				}
 			}
 		}
-		details[0]=id;	// id of booked car/service
-		details[1]=mymarker[1];	//type 0 for cab or 1 for service
+		details[0] = id; // id of booked car/service
+		details[1] = mymarker[1]; //type 0 for cab or 1 for service
 		socket.emit('bookid', details);
-		if(details[1]==0)
-		socket.to(id).emit('drivepath', mymarker[0]);
-		else
-		socket.to(id).emit('servicepath', mymarker[0]);
+		if (bookid != id) { //To check if same service/cab booked twice
+			if (details[1] == 0)
+				socket.to(id).emit('drivepath', mymarker[0]);
+			else
+				socket.to(id).emit('servicepath', mymarker[0]);
+		}
+		bookid = id;
 	});
 
-//locChanged is an event which is fired when the location of any driver changes
+
+	//locChanged is an event which is fired when the location of any driver changes
 	socket.on('locChanged', function(data) {
 		drivers[socket.id] = {
 			id: socket.id,
@@ -142,7 +146,7 @@ io.on('connection', function(socket) {
 		})
 	});
 
-//servicelocChanged is similar to previous “locChanged”and perform similar update operation of service list
+	//servicelocChanged is similar to previous “locChanged”and perform similar update operation of service list
 	socket.on('servicelocChanged', function(data) {
 		service[socket.id] = {
 			id: socket.id,
@@ -155,7 +159,7 @@ io.on('connection', function(socket) {
 		})
 	});
 
-//disconnect listens to the event if any driver/serviceman/customer goes offline, updates the corresponding list and broadcast's it
+	//disconnect listens to the event if any driver/serviceman/customer goes offline, updates the corresponding list and broadcast's it
 	socket.on('disconnect', function() {
 		if (socket.isDriver) {
 			console.log("Driver disconnected at " + socket.id);
@@ -163,11 +167,11 @@ io.on('connection', function(socket) {
 			delete drivers[socket.id];
 		}
 		if (socket.isservice) {
-			console.log("service disconnected at " + socket.id);
+			console.log("Serviceman disconnected at " + socket.id);
 			socket.broadcast.to('customers').emit('serviceRemoved', service[socket.id]);
 			delete service[socket.id];
-		} 
-		 else {
+		}
+		if (!socket.isDriver && !socket.isservice) {
 			console.log('Customer Disconnected at' + socket.id);
 		}
 	});
