@@ -172,7 +172,6 @@ socket.on('bookid', function(id) {
 					L.latLng(markers[id[0]].getLatLng())
 				]
 			});
-
 			if (id[1] == 0)
 				confirm('Your Ride has been booked');
 			if (id[1] == 1)
@@ -183,6 +182,7 @@ socket.on('bookid', function(id) {
 					map.removeLayer(markers[key]);
 			}
 			setTimeout(function() {
+				console.log('time is',time);
 				eta = Math.round(time._routes[0].summary.totalTime / 60);
 				if (eta == 0)	//if time rounds off to 0 minutes
 					eta++;
